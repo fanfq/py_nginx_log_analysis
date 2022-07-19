@@ -144,6 +144,9 @@ def log_write_to_json(lst):
     print('log_write_to_json spend: {} ms'.format(spend))
 
 
+'''
+一行一行的写入文件
+'''
 def log_write_to_file(lst):
     start = timestamp_millis()
     t = time.strftime("%Y%m%d", time.localtime())
