@@ -6,6 +6,7 @@
 # https://cloud.tencent.com/developer/article/1622306
 
 from qqwry import QQwry  # ip库
+from qqwry import updateQQwry #跟新网络库
 import re  # 正则
 import datetime
 import time
@@ -18,6 +19,9 @@ qq = QQwry()
 qq.load_file('qqwry.dat')
 qq_version = qq.get_lastone()
 print('qqwry ver.', qq_version)
+
+# 跟新网络库
+# updateQQwry('qqwry.dat')
 
 obj = re.compile(
     r'(?P<ip>.*?)- - \[(?P<time>.*?)\] "(?P<request>.*?)" (?P<status>.*?) (?P<bytes>.*?) "(?P<referer>.*?)" "(?P<ua>.*?)"')
@@ -154,4 +158,5 @@ def log_write_to_file(lst):
 if __name__ == '__main__':
     lst = log_load(log_file_name)
     # log_analysis(lst)
-    log_write_to_json(lst)
+    # log_write_to_json(lst)
+    log_write_to_file(lst)
