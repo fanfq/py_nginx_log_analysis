@@ -31,7 +31,7 @@ def timestamp_millis():
     return int(round(time.time() * 1000))
 
 
-def log_load(path):
+def log_load(path,filter_by_reqs):
     start = timestamp_millis()
     lst = []
     with open(path, mode="r", encoding="utf-8") as f:
@@ -39,7 +39,11 @@ def log_load(path):
             line = line.strip()
             dic = parse(line)
             if dic:
-                lst.append(dic)
+                if len(filter_by_reqs)>0:
+                    if dic['request'] in filter_by_reqs:
+                        lst.append(dic)
+                else:
+                    lst.append(dic)
             # print(rest)
         rows = len(lst)
         spend = timestamp_millis() - start
@@ -76,6 +80,9 @@ def parse(line):
         req_time = req_time.replace(" +0800", "")  # 替换+0800为空
         dist_time = datetime.datetime.strptime(req_time, "%d/%b/%Y:%H:%M:%S")  # 将时间格式化成友好的格式
         dic['time'] = str(dist_time)
+
+        dist_date = str(dist_time).split(" ")[0]  # 仅获取日期
+        dic['date'] = dist_date
 
         # request处理
         request = result.group(
@@ -115,7 +122,11 @@ def time_format():
     req_time = '21/Dec/2019:21:45:31 +0800'
     req_time = req_time.replace(" +0800", "")  # 替换+0800为空
     dist_time = datetime.datetime.strptime(req_time, "%d/%b/%Y:%H:%M:%S")  # 将时间格式化成友好的格式
+
+    dist_date = str(dist_time).split(" ")[0]   #仅获取日期
+
     print(dist_time)
+    print(dist_date)
 
 
 def log_analysis(lst):
@@ -125,12 +136,24 @@ def log_analysis(lst):
     # r = pd.value_counts(df['ip'])
     # print(r)
 
-    # 自定义标题&20条返回
-    ip_count = pd.value_counts(df['ip']).reset_index().rename(columns={"index": "ip", "ip": "count"}).iloc[:20, :]
+    # 自定义标题&30条返回
+    ip_count = pd.value_counts(df['ip']).reset_index().rename(columns={"index": "ip", "ip": "count"}).iloc[:30, :]
     print(ip_count)
 
-    # mutil
+    # ip_region
     r = pd.value_counts(df['ip_region']).reset_index().iloc[:30, :]
+    print(r)
+
+    # ua
+    r = pd.value_counts(df['ua']).reset_index().iloc[:30, :]
+    print(r)
+
+    # date
+    r = pd.value_counts(df['date']).reset_index().iloc[:30, :]
+    print(r)
+
+    # request
+    r = pd.value_counts(df['request']).reset_index().iloc[:30, :]
     print(r)
 
 
@@ -158,8 +181,21 @@ def log_write_to_file(lst):
     print('log_write_to_file spend: %{} ms'.format(spend))
 
 
+'''
+写入sqlite数据库
+'''
+def log_insert_to_sqlite(lst):
+    start = timestamp_millis()
+    spend = timestamp_millis() - start
+    print('log_insert_to_sqlite spend: %{} ms'.format(spend))
+
+
 if __name__ == '__main__':
-    lst = log_load(log_file_name)
-    # log_analysis(lst)
+    #filter_by_requests = ['/app/api/member/sync']
+    filter_by_requests = []
+
+    #time_format()
+    lst = log_load(log_file_name,filter_by_requests)
+    log_analysis(lst)
     # log_write_to_json(lst)
-    log_write_to_file(lst)
+    #log_write_to_file(lst)
